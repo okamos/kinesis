@@ -14,15 +14,20 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rand::{thread_rng, Rng};
 use rand::distributions::{Alphanumeric};
 use rusoto_core::{Region};
-use rusoto_firehose::{KinesisFirehose, KinesisFirehoseClient, PutRecordInput, Record};
+use rusoto_firehose::{
+    KinesisFirehose,
+    KinesisFirehoseClient,
+    PutRecordInput,
+    Record
+};
 
 lazy_static! {
     static ref CLIENT: KinesisFirehoseClient = KinesisFirehoseClient::simple(Region::ApNortheast1);
 }
-fn now() -> String {
+fn now() -> u64 {
     let now = SystemTime::now();
     let epoch = now.duration_since(UNIX_EPOCH).expect("Time wnt backwards");
-    format!("{:?}", epoch.as_secs())
+    epoch.as_secs()
 }
 
 fn generate_session_id(n: usize) -> String {
@@ -35,7 +40,7 @@ fn generate_session_id(n: usize) -> String {
 fn index(wid: u32) -> String {
     let mut input = PutRecordInput::default();
     let mut record = Record::default();
-    input.delivery_stream_name = String::from("story-staging");
+    input.delivery_stream_name = String::from("your-stream-name");
     let event = json!({
         "wsid": generate_session_id(32),
         "usid": "",
@@ -47,9 +52,11 @@ fn index(wid: u32) -> String {
     });
     // TODO: error handling
     record.data = serde_json::to_vec(&event).unwrap();
+    record.data.push(10); // line feed
     input.record = record;
-    CLIENT.put_record(&input);
-    format!("{}, we need to talk about your coolness.", wid)
+    let _result = CLIENT.put_record(&input).sync().unwrap();
+    // println("{:?}", result)
+    format!("{}, we need to talk about your coolness.", event)
 }
 
 fn main() {
