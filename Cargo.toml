@@ -1,0 +1,13 @@
+[package]
+name = "kinesis"
+version = "0.1.0"
+authors = ["okamos <himinato.k@gmail.com>"]
+
+[dependencies]
+rocket = "0.3.15"
+rocket_codegen = "0.3.15"
+rusoto_core = "0.32.0"
+rusoto_firehose = "0.32.0"
+lazy_static = "1.0.2"
+rand = "0.5.4"
+serde_json = "^1.0"
